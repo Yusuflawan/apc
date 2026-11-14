@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" content="#f6f7f1">
+	<title>Membership Card | PBAT</title>
+	<link rel="stylesheet" href="assets/css/bootstrap.min.css">
+	<link rel="stylesheet" href="assets/css/style.css">
+	<link rel="stylesheet" href="assets/css/dashboard.css">
+</head>
+<body>
+	<main class="membership-page">
+		<div class="membership-page__header">
+			<p class="membership-page__eyebrow">PBAT Door-to-Door Movement</p>
+			<h1>Your membership card</h1>
+			<p class="membership-page__hint">Front and back of your member ID</p>
+			<button class="membership-page__download" id="download-card" type="button">Download card as PDF</button>
+			<!-- <p class="membership-page__download-hint">Choose “Save as PDF” in the print window.</p> -->
+		</div>
+
+		<div class="membership-cards" aria-label="Membership card">
+			<section class="membership-card membership-card--front" aria-label="Front of membership card">
+				<header class="card-header">
+					<img class="card-logo" src="assets/images/logo/logo-form.PNG" alt="PBAT Door to Door Movement 2027">
+					<div class="card-title">
+						<h2>PBAT DOOR-TO-DOOR MOVEMENT</h2>
+						<p>MEMBERSHIP CARD</p>
+					</div>
+				</header>
+
+				<div class="card-front-content">
+					<div class="member-portrait">
+						<img id="member-photo" alt="" hidden>
+						<span id="member-initials" aria-hidden="true">PB</span>
+					</div>
+
+					<div class="member-details">
+						<div class="card-field">
+							<span class="card-field__label">Full name</span>
+							<strong class="card-field__value card-field__value--green" id="member-name">Member</strong>
+						</div>
+						<div class="card-field">
+							<span class="card-field__label">Membership no.</span>
+							<strong class="card-field__value card-field__value--red" id="member-id">Not assigned</strong>
+						</div>
+						<div class="card-field card-field--inline">
+							<div>
+								<span class="card-field__label">State</span>
+								<strong class="card-field__value card-field__value--green" id="member-state">Not provided</strong>
+							</div>
+							<div>
+								<span class="card-field__label">Local govt.</span>
+								<strong class="card-field__value card-field__value--red" id="member-lga">Not provided</strong>
+							</div>
+						</div>
+
+						<div class="member-badges" aria-label="Membership status">
+							<span class="member-badge member-badge--member"><span aria-hidden="true">♙</span><span id="member-role">Member</span></span>
+							<!-- <span class="member-badge member-badge--verified"><span aria-hidden="true" id="verification-icon">!</span><span id="member-verification">Verification pending</span></span> -->
+							<span class="member-badge member-badge--status"><span aria-hidden="true">●</span><span id="member-status">Status unavailable</span></span>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="membership-card membership-card--back" aria-label="Back of membership card">
+				<header class="card-header">
+					<img class="card-logo" src="assets/images/logo/logo-form.PNG" alt="PBAT Door to Door Movement 2027">
+					<div class="card-title">
+						<h2>PBAT DOOR-TO-DOOR MOVEMENT</h2>
+						<p>MEMBERSHIP CARD</p>
+					</div>
+				</header>
+
+				<div class="card-back-content">
+					<div class="card-back-brand">
+						<img src="assets/images/logo/logo-form.PNG" alt="PBAT Door to Door Movement 2027">
+					</div>
+					<div class="member-details member-details--back">
+						<div class="card-field">
+							<span class="card-field__label">Ward</span>
+							<strong class="card-field__value card-field__value--green" id="member-ward">Not provided</strong>
+						</div>
+						<div class="card-field">
+							<span class="card-field__label">Polling unit</span>
+							<strong class="card-field__value card-field__value--red" id="member-polling-unit">Not provided</strong>
+						</div>
+						<div class="card-field card-field--phone">
+							<span class="card-field__label">Phone number</span>
+							<strong class="card-field__value card-field__value--green" id="member-phone">Not provided</strong>
+						</div>
+					</div>
+				</div>
+			</section>
+		</div>
+	</main>
+	<script src="assets/js/my-js/dashboard.js"></script>
+</body>
+</html>

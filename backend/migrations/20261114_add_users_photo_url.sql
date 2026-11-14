@@ -1,0 +1,2 @@
+ALTER TABLE users
+    ADD COLUMN photo_url VARCHAR(2048) NULL AFTER membership_id;
