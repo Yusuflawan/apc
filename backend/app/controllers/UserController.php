@@ -40,6 +40,21 @@ class UserController
         return successResponse($response["message"], $response["data"]);
     }
 
+    public function getMembers()
+    {
+        $response = $this->usersModel->getMembers();
+
+        if ($response["status"] === "error") {
+            return errorResponse($response["message"], $response["error_code"] ?? 500);
+        }
+
+        $members = $response["data"];
+        return successResponse($response["message"], [
+            "count" => count($members),
+            "members" => $members
+        ]);
+    }
+
     public function getStates()
     {
         $response = $this->usersModel->getStates();

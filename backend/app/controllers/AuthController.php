@@ -7,6 +7,7 @@ use \Firebase\JWT\Key;
 
 require_once './app/config/Database.php';
 require_once './app/models/Users.php';
+require_once './app/helpers/PublitioPhotoUploader.php';
 
 class AuthController
 {
@@ -63,7 +64,7 @@ class AuthController
         $photoUrl = trim($data["photo_url"]);
         $password = password_hash($data["password"], PASSWORD_BCRYPT);
 
-        if (!$this->isPublitioPhotoUrl($photoUrl)) {
+        if (!PublitioPhotoUploader::isPublitioPhotoUrl($photoUrl)) {
             return errorResponse("A valid Publitio photo URL is required");
         }
 
@@ -128,138 +129,12 @@ class AuthController
 
     public function uploadPhoto()
     {
-        if (!isset($_FILES["photo"]) || !is_array($_FILES["photo"])) {
-            return errorResponse("A membership photo is required");
+        $upload = PublitioPhotoUploader::upload($_FILES["photo"] ?? null, "membership");
+        if ($upload["status"] === "error") {
+            return errorResponse($upload["message"], $upload["error_code"]);
         }
 
-        $photo = $_FILES["photo"];
-        if ($photo["error"] !== UPLOAD_ERR_OK || !is_uploaded_file($photo["tmp_name"])) {
-            return errorResponse("The membership photo upload failed");
-        }
-
-        $maxFileSize = 5 * 1024 * 1024;
-        if ($photo["size"] < 1 || $photo["size"] > $maxFileSize) {
-            return errorResponse("The membership photo must be 5 MB or smaller");
-        }
-
-        $fileInfo = new finfo(FILEINFO_MIME_TYPE);
-        $mimeType = $fileInfo->file($photo["tmp_name"]);
-        $allowedTypes = [
-            "image/jpeg" => "jpg",
-            "image/png" => "png",
-            "image/webp" => "webp"
-        ];
-        if (!isset($allowedTypes[$mimeType]) || getimagesize($photo["tmp_name"]) === false) {
-            return errorResponse("Choose a valid JPG, PNG, or WebP image");
-        }
-
-        $apiKey = $_ENV["PUBLITIO_API_KEY"] ?? "";
-        $apiSecret = $_ENV["PUBLITIO_API_SECRET"] ?? "";
-        if ($apiKey === "" || $apiSecret === "") {
-            return errorResponse("Photo upload is not configured on the server", 503);
-        }
-        if (!function_exists("curl_init")) {
-            return errorResponse("Photo upload is unavailable on the server", 503);
-        }
-
-        $timestamp = (string) time();
-        $nonce = str_pad((string) random_int(0, 99999999), 8, "0", STR_PAD_LEFT);
-        $signature = sha1($timestamp . $nonce . $apiSecret);
-        $requestedPublicId = "membership-photo-" . strtoupper(bin2hex(random_bytes(4)));
-        $query = http_build_query([
-            "api_key" => $apiKey,
-            "api_timestamp" => $timestamp,
-            "api_nonce" => $nonce,
-            "api_signature" => $signature
-        ]);
-
-        $curlFile = curl_file_create(
-            $photo["tmp_name"],
-            $mimeType,
-            "membership-photo." . $allowedTypes[$mimeType]
-        );
-        $curl = curl_init("https://api.publit.io/v1/files/create?" . $query);
-        curl_setopt_array($curl, [
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => [
-                "file" => $curlFile,
-                "public_id" => $requestedPublicId,
-                "privacy" => "1",
-                "option_ad" => "0",
-                "title" => "PBAT membership photo"
-            ],
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CONNECTTIMEOUT => 10,
-            CURLOPT_TIMEOUT => 60
-        ]);
-
-        $responseBody = curl_exec($curl);
-        $httpStatus = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        $curlFailed = $responseBody === false;
-        curl_close($curl);
-
-        if ($curlFailed || $httpStatus < 200 || $httpStatus >= 300) {
-            return errorResponse("Unable to upload the membership photo to Publitio", 502);
-        }
-
-        $uploadResult = json_decode($responseBody, true);
-        if (!is_array($uploadResult)) {
-            return errorResponse("Publitio did not return a valid image URL", 502);
-        }
-
-        $uploadData = isset($uploadResult["data"]) && is_array($uploadResult["data"])
-            ? $uploadResult["data"]
-            : $uploadResult;
-        $publicId = $uploadData["public_id"] ?? "";
-        $extension = strtolower((string) ($uploadData["extension"] ?? ""));
-        if (
-            !is_string($publicId) ||
-            !preg_match('/^[A-Za-z0-9_-]+$/', $publicId) ||
-            $publicId !== $requestedPublicId ||
-            !in_array($extension, ["jpg", "jpeg", "png", "webp"], true)
-        ) {
-            return errorResponse("Publitio did not confirm the membership photo public ID", 502);
-        }
-
-        $urlCandidates = [
-            $uploadData["url_preview"] ?? null,
-            $uploadData["url"] ?? null,
-            $uploadData["file"]["url_preview"] ?? null,
-            $uploadData["file"]["url"] ?? null
-        ];
-        $photoUrl = "";
-        foreach ($urlCandidates as $urlCandidate) {
-            if (is_string($urlCandidate) && $this->isPublitioPhotoUrl($urlCandidate)) {
-                $photoUrl = $urlCandidate;
-                break;
-            }
-        }
-
-        if (!$this->isPublitioPhotoUrl($photoUrl)) {
-            return errorResponse("Publitio uploaded the image but did not return a usable image URL", 502);
-        }
-
-        return successResponse("Photo uploaded successfully", ["photo_url" => $photoUrl]);
-    }
-
-    private function isPublitioMediaDomain($host)
-    {
-        $host = strtolower($host);
-        return $host === "media.publit.io" ||
-            (strlen($host) > strlen(".publit.io") && substr($host, -strlen(".publit.io")) === ".publit.io");
-    }
-
-    private function isPublitioPhotoUrl($url)
-    {
-        if (strlen($url) > 2048 || filter_var($url, FILTER_VALIDATE_URL) === false) {
-            return false;
-        }
-
-        $parts = parse_url($url);
-        return is_array($parts)
-            && isset($parts["scheme"], $parts["host"])
-            && strtolower($parts["scheme"]) === "https"
-            && $this->isPublitioMediaDomain($parts["host"]);
+        return successResponse("Photo uploaded successfully", ["photo_url" => $upload["photo_url"]]);
     }
 
     public function login()

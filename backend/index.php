@@ -27,7 +27,7 @@ handlePreflight();
 require_once './app/config/Database.php';
 require_once './app/controllers/AuthController.php';
 require_once './app/controllers/UserController.php';
-// require_once './app/controllers/ProductController.php';
+require_once './app/controllers/EventController.php';
 // require_once './app/controllers/SaleController.php';
 
 require_once './app/middlewares/AuthMiddleware.php';
@@ -37,7 +37,11 @@ $router->post('/auth/register', fn() => (new AuthController())->register());
 $router->post('/auth/upload-photo', fn() => (new AuthController())->uploadPhoto());
 $router->post('/auth/login', fn() => (new AuthController())->login());
 $router->get('/states', fn() => (new UserController())->getStates());
+$router->get('/events', fn() => (new EventController())->getAllEvents());
 $router->get('/state/{id}/lgas', fn($id) => (new UserController())->getLGAsByStateId($id));
+$router->get('/admin/members', fn() => adminRoute(fn() => (new UserController())->getMembers()));
+$router->post('/admin/events', fn() => adminRoute(fn() => (new EventController())->createEvent()));
+
 
 
 // helper function for protected routes
@@ -46,6 +50,18 @@ function protectedRoute($callback)
     $auth = new AuthMiddleware();
     $auth->authenticate();        // Check JWT
     return $callback();
+}
+
+function adminRoute($callback)
+{
+    return protectedRoute(function () use ($callback) {
+        $user = AuthMiddleware::user();
+        if (!$user || ($user->role ?? null) !== 'admin') {
+            return errorResponse('Admin access required', 403);
+        }
+
+        return $callback();
+    });
 }
 
 

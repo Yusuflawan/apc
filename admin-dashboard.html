@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f3f5f2">
+    <title>Admin Dashboard | PBAT</title>
+    <link rel="stylesheet" href="assets/css/admin-dashboard.css">
+</head>
+<body>
+    <main class="admin-page">
+        <header class="admin-header">
+            <div>
+                <p class="admin-eyebrow">PBAT Door-to-Door Movement</p>
+                <h1>Admin dashboard</h1>
+            </div>
+            <div class="admin-header__actions">
+                <span>Signed in as <strong id="admin-user-name">Admin</strong></span>
+                <button class="button button--secondary" id="logout-button" type="button">Log out</button>
+            </div>
+        </header>
+
+        <section class="admin-summary" aria-labelledby="members-heading">
+            <div>
+                <p class="admin-eyebrow">Membership overview</p>
+                <h2 id="members-heading">Members</h2>
+                <p class="admin-summary__hint">All registered member accounts</p>
+            </div>
+            <div class="member-count" id="member-count" aria-live="polite">—</div>
+        </section>
+
+        <section class="admin-panel" aria-labelledby="member-list-heading">
+            <div class="panel-heading">
+                <div>
+                    <h2 id="member-list-heading">Member directory</h2>
+                    <p>Review member contact and membership details.</p>
+                </div>
+                <button class="button button--secondary" id="refresh-members" type="button">Refresh list</button>
+            </div>
+            <p class="admin-message" id="members-message" role="status" aria-live="polite"></p>
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Membership ID</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Phone</th>
+                            <th scope="col">State / LGA</th>
+                            <th scope="col">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="members-table-body">
+                        <tr><td colspan="6">Loading members...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="admin-panel" aria-labelledby="create-event-heading">
+            <div class="panel-heading">
+                <div>
+                    <h2 id="create-event-heading">Create a past event</h2>
+                    <p>Upload an event photo, description, and event date.</p>
+                </div>
+            </div>
+            <form id="create-event-form" enctype="multipart/form-data">
+                <div class="event-form-grid">
+                    <div class="form-field form-field--wide">
+                        <label for="event-photo">Event photo</label>
+                        <input id="event-photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" required>
+                        <img id="event-photo-preview" class="event-photo-preview" alt="Selected event photo preview" hidden>
+                        <small>JPG, PNG, or WebP; maximum size 5 MB.</small>
+                    </div>
+                    <label class="form-field" for="event-date">
+                        Event date
+                        <input id="event-date" name="date" type="date" required>
+                    </label>
+                    <label class="form-field form-field--wide" for="event-description">
+                        Description
+                        <textarea id="event-description" name="description" rows="4" maxlength="5000"
+                                  placeholder="Describe the event" required></textarea>
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <p class="admin-message" id="event-message" role="status" aria-live="polite"></p>
+                    <button class="button" id="create-event-button" type="submit">Create event</button>
+                </div>
+            </form>
+        </section>
+    </main>
+    <script src="assets/js/my-js/admin-dashboard.js"></script>
+</body>
+</html>

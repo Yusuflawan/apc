@@ -92,6 +92,37 @@ class Users
         }
     }
 
+    public function getMembers()
+    {
+        try {
+            $query = "SELECT
+                        users.id,
+                        users.name,
+                        users.email,
+                        users.phone,
+                        users.gender,
+                        users.membership_id,
+                        users.photo_url,
+                        users.status,
+                        states.state AS state_name,
+                        lgas.lga_name AS lga_name
+                    FROM users
+                    LEFT JOIN states ON users.state_id = states.id
+                    LEFT JOIN lgas ON users.lga_id = lgas.id
+                    WHERE users.role = :role
+                    ORDER BY users.name ASC";
+            $stmt = $this->db->prepare($query);
+            $role = "member";
+            $stmt->bindParam(":role", $role, PDO::PARAM_STR);
+            $stmt->execute();
+            $members = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            return ["status" => "success", "message" => "Members retrieved successfully.", "data" => $members];
+        } catch (PDOException $e) {
+            return ["status" => "error", "message" => $e->getMessage(), "error_code" => 500];
+        }
+    }
+
     public function getLGAsByStateId($id)
     {
         try {
